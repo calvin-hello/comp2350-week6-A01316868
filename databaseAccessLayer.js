@@ -25,13 +25,13 @@ async function addUser(postData) {
 	let hashedPassword = await bcrypt.hash(postData.password, saltRounds);
 	let sqlInsertUser = `
 	INSERT INTO web_user (first_name, last_name, email, password_hash)
-	VALUES (:first_name, :last_name, :email, :hashedPasword);
+	VALUES (:first_name, :last_name, :email, :hashedPassword);
 	`;
 	let params = {
 		first_name: postData.first_name,
 		last_name: postData.last_name,
 		email: postData.email,
-		hashedPasword: hashedPassword
+		hashedPassword: hashedPassword
 	};
 	console.log(sqlInsertUser);
 	try {
