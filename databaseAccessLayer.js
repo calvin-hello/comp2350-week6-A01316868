@@ -1,4 +1,6 @@
 const database = include('/databaseConnection');
+const bcrypt = require('bcrypt');
+const saltRounds = 12;
 
 
 async function getAllUsers() {
@@ -19,4 +21,49 @@ async function getAllUsers() {
 }
 
 
-module.exports = {getAllUsers}
+async function addUser(postData) {
+	let hashedPassword = await bcrypt.hash(postData.password, saltRounds);
+	let sqlInsertUser = `
+	INSERT INTO web_user (first_name, last_name, email, password_hash)
+	VALUES (:first_name, :last_name, :email, :hashedPasword);
+	`;
+	let params = {
+		first_name: postData.first_name,
+		last_name: postData.last_name,
+		email: postData.email,
+		hashedPasword: hashedPassword
+	};
+	console.log(sqlInsertUser);
+	try {
+		const results = await database.query(sqlInsertUser, params);
+		let insertedID = results[0].insertId;
+		console.log("🙋Inserted new user with ID:");
+		console.log(insertedID);
+		return true;
+	}
+	catch (err) {
+		console.log(err);
+		return false;
+	}
+}
+async function deleteUser(webUserId) {
+	let sqlDeleteUser = `
+	DELETE FROM web_user
+	WHERE web_user_id = :userID
+	`;
+	let params = {
+		userID: webUserId
+	};
+	console.log(sqlDeleteUser);
+	try {
+		await database.query(sqlDeleteUser, params);
+		return true;
+	}
+	catch (err) {
+		console.log(err);
+		return false;
+	}
+}
+
+
+module.exports = {getAllUsers, addUser, deleteUser}
